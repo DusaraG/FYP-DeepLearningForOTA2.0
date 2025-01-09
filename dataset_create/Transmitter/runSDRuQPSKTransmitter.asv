@@ -43,11 +43,11 @@ function underrun = runSDRuQPSKTransmitter(prmQPSKTransmitter,rx_out_complex)
     %Transmission Process
     disp("started")
     n=1;
-    r=10000;            
-    rx_out_complex = rx_out_complex';
+    r=1000;            rx_out_complex(:,i)
+
     for i = 1:n 
         for j = 1:r
-            tunderrun =radio(pTransmitterFilter(rx_out_complex(:,i)));
+            tunderrun =radio(pTransmitterFilter();
             underrun = underrun + tunderrun;
         end
     end

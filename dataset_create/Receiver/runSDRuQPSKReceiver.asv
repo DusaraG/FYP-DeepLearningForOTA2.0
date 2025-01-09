@@ -14,20 +14,24 @@ cleanupRadio = onCleanup(@()release(radio));
 % Initialize variables
 currentTime = zeros(1, 1);
 overflow = uint32(0);
-rxsignal=zeros(100,8, 'like', complex(0));
+rxsignal=zeros(2000,8, 'like', complex(0));
 index=1;
 disp("started receiving")
 started = false;
+[rcvdSignal_, ~, toverflow] = step(radio);
+if abs(rcvdSignal_) > THRE
+for i =1:2000
 while currentTime < prmQPSKReceiver.StopTime
     
     [rcvdSignal_, ~, toverflow] = step(radio);
     THRE = 0.09;
-    
+           
+
     if (any(abs(rcvdSignal_) > THRE) || started)
         rxsignal(index,:) = rcvdSignal_;
         started = true;
         index = index + 1;
-        display(rcvdSignal_);
+        % display(rcvdSignal_);
     end
     
     overflow = toverflow + overflow;
