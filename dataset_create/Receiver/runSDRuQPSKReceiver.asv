@@ -1,0 +1,40 @@
+function overflow = runSDRuQPSKReceiver(prmQPSKReceiver,~)
+persistent radio
+if isempty(radio)
+
+    radio = comm.SDRRTLReceiver('0','CenterFrequency',prmQPSKReceiver.RTLCenterFrequency,'SampleRate',prmQPSKReceiver.RTLFrontEndSampleRate, ...
+    'SamplesPerFrame',8,'EnableTunerAGC',true,'OutputDataType','double');
+    display(radio)
+    
+end
+
+
+cleanupRadio = onCleanup(@()release(radio));
+
+% Initialize variables
+currentTime = zeros(1, 1);
+overflow = uint32(0);
+rxsignal=zeros(100,8, 'like', complex(0));
+index=1;
+disp("started receiving")
+started = false;
+while currentTime < prmQPSKReceiver.StopTime
+    
+    [rcvdSignal_, ~, toverflow] = step(radio);
+    THRE = 0.09;
+    
+    if (any(abs(rcvdSignal_) > THRE) || started)
+        rxsignal(index,:) = rcvdSignal_;
+        started = true;
+        index = index + 1;
+        display(rcvdSignal_);
+    end
+    
+    overflow = toverflow + overflow;
+    currentTime = currentTime + prmQPSKReceiver.RTLFrameTime;
+end
+save("rx","rxsignal");
+disp("finished receiving")
+
+
+
