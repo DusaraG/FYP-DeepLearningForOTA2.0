@@ -173,7 +173,7 @@ classdef StochasticChannelv3 < nnet.layer.Layer
         
         % Forward pass
      function outputs = predict(layer, inputs)
-        display(inputs)
+        %display(inputs)
         batchSize = size(inputs, 2);
         numFeatures = size(inputs, 1) / 2; % Assuming input has real and imaginary parts
 
@@ -190,15 +190,11 @@ classdef StochasticChannelv3 < nnet.layer.Layer
         
         %output = cat(1,reshape(output(:,:,1)',batchSize,[]), reshape(output(:,:,2)',batchSize,[]));
         % Reshape back to original shape if necessary
-        outputs = reshape(output, [], batchSize,size(inputs,4));
-        display(outputs)
+        outputs = reshape(output, [],size(inputs,4));
+        %display(outputs)
         
      end
-%      function dLdX = backward(layer, X, Z, dLdZ, memory)
-%         % Prevent backpropagation by setting gradients to zero
-%         dLdX = zeros(size(X), 'like', X);  % Zero gradient for inputs
-%         dLdParams = [];  % No trainable parameters
-%      end
+
     function out = inverseUpsampleAndFilter(layer, dLdY)
     
         real_part = dLdY(1,:, :, :);
@@ -210,40 +206,42 @@ classdef StochasticChannelv3 < nnet.layer.Layer
         % Downsample the signal
         real_downsampled = real_part(:, f+1:size(real_part,2)-f, :, :);
         imag_downsampled = imag_part(:, f+1:size(real_part,2)-f, :, :);
-        display(real_downsampled)
+        %display(real_downsampled)
         
         real_downsampled = reshape(real_downsampled,4,[],size(real_downsampled,4));
         imag_downsampled = reshape(imag_downsampled,4,[],size(imag_downsampled,4));
-        display(real_downsampled)
+        %display(real_downsampled)
 
         real_downsampled = permute(real_downsampled,[2,1,3]);
         imag_downsampled = permute(imag_downsampled,[2,1,3]);
-        display(real_downsampled)
+        %display(real_downsampled)
 
         real_downsampled = reshape(real_downsampled, [], size(real_downsampled,3));
         imag_downsampled = reshape(imag_downsampled, [], size(imag_downsampled,3));
-        display(real_downsampled)
+        %display(real_downsampled)
 
         real = real_downsampled(1:size(real_downsampled,1)/layer.r,:);
         imag = imag_downsampled(1:size(real_downsampled,1)/layer.r,:);
-        display(real)
+        %display(real)
         
-        out = [real,imag];
-        display(out)
-        out = reshape(out,[],1,size(real,2));
-        display(out)
+        %out = [real,imag];
+        out = cat(1,real,imag);
+        %display(out)
+        %out = reshape(out,[],1,size(real,2));
+        %display(out)
     end
 
-
+% 
     function dLdX = backward(layer, ~, ~, dLdY, ~)
         % dLdY: Gradient of the loss with respect to the output of this layer
         % input: The original input to the forward method
-        display(dLdY)
+        %display(dLdY)
         % Step 1: Reshape dLdY to the expected output format (1x92x6400 in your case)
-        dLdY = reshape(dLdY, 2, [],1, size(dLdY, 3));  % Adjust the size as needed
-        display(dLdY)
+        dLdY = reshape(dLdY, 2, [],1, size(dLdY, 2));  % Adjust the size as needed
+        %display(dLdY)
         dLdX = layer.inverseUpsampleAndFilter(dLdY);  % Process each sample
-        display(dLdX)
+        dLdX = reshape(dLdX,[],1,size(dLdX,2));
+        %display(dLdX)
 
     
     

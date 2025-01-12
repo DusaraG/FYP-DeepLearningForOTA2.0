@@ -29,7 +29,7 @@ classdef SlidingWindow < nnet.layer.Layer
             [rows, time, batch_size] = size(X);
             pad_size = floor(layer.window_size / 2);
             padded_matrix = padarray(X, [pad_size 0 0], 0, 'both');
-            display(padded_matrix)
+            %display(padded_matrix)
 
             % Initialize the matrix to store sliding windows
             window_slices = cell(1,layer.window_size);
@@ -42,16 +42,16 @@ classdef SlidingWindow < nnet.layer.Layer
             % Concatenate the windows along the depth dimension
             output = cat(1, window_slices{:});
             
-            display(output)
+            %display(output)
 
         end
         
         function gradients = backward(layer, X, Z, grad, ~)
             % Forward pass
-            display(grad)
+            %display(grad)
             padsize = floor(layer.window_size / 2);
             gradients = grad(padsize:padsize+size(X,1)-1,:,:);
-            display(gradients)
+            %display(gradients)
 
         end
         % Get configuration for serialization
